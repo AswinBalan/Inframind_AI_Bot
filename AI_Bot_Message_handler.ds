@@ -1,0 +1,69 @@
+
+response = Map();
+
+if(message.equalsIgnoreCase("hi") || message.equalsIgnoreCase("hello") || message.equalsIgnoreCase("hoi") || message.equalsIgnoreCase("hii") || message.equalsIgnoreCase("hey"))
+{
+	response.put("text","Hi! I can do the following things! :smile: ");
+	suggestions = {"list":{{"text":"Search Books"},{"text":"News"}}};
+	response.put("suggestions",suggestions);
+}
+// GOOGLE BOOKS SECTION
+if(message.equalsIgnoreCase("Search Books"))
+{
+	response.put("text","How do you want to search! :smile: ");
+	suggestions = {"list":{{"text":"Shallow Search"},{"text":"Deep Search"}}};
+	response.put("suggestions",suggestions);
+}
+
+//Analysing user request for shallow search
+// Asking clarifications 
+else if(message.equalsIgnoreCase("Shallow Search"))
+{
+	context = {"id":"OPTIONS","timeout":"300","params":{{"name":"type","question":"Here are few things you can search!","suggestions":{"list":{{"text":"Books"},{"text":"Magazines"}}}},{"name":"details","question":"Give any one of the details below","suggestions":{"list":{{"text":"Author"},{"text":"Title"},{"text":"Publisher"}}}},{"name":"answer","question":"Enter the Name"}}};
+	response.put("context",context);
+}
+//Analysing request for deep search
+else if(message.equalsIgnoreCase("Deep Search"))
+{
+	response.put("text","What do you want to Search :search: ");
+	suggestions = {"list":{{"text":"Books"},{"text":"Magazines"}}};
+	response.put("suggestions",suggestions);
+}
+// To check whether the user wants to search for books
+else if(message.containsIgnoreCase("Books"))
+{
+	context = {"id":"BOOKS","timeout":"300","params":{{"name":"title","question":"Enter the Book name"},{"name":"author","question":"Enter the Author name"},{"name":"answer","question":"Enter the publisher name or ISBN number(type 'no' if you don't know)"}}};
+	response.put("context",context);
+}
+// To check if the user wants Magazine
+else if(message.contains("Magazines"))
+{
+	context = {"id":"MAGAZINES","timeout":"300","params":{{"name":"title","question":"Enter the Magazine name"},{"name":"author","question":"Enter the Author name"},{"name":"answer","question":"Enter the Publisher name or ISBN number(type 'no' if you don't know)"}}};
+	response.put("context",context);
+}
+// NEWS SECTION
+if(message.equalsIgnoreCase("News"))
+{
+	suggestions = {"list":{{"text":"Instant News!"},{"text":"Top Headlines!"},{"text":"Category News!"}}};
+	response.put("text","Hi! Here are few things you can try :wink: ");
+	response.put("suggestions",suggestions);
+}
+//Category suggestions - for different categories 
+else if(message.containsIgnoreCase("Category News!"))
+{
+	context = {"id":"HOT NEWS","timeout":"300","params":{{"name":"type","question":"Great!choose the type!!","suggestions":{"list":{{"text":"general"},{"text":"business"},{"text":"technology"},{"text":"sports"},{"text":"entertainment"},{"text":"health"},{"text":"science"}}}}}};
+	response.put("context",context);
+}
+// Asking suggestions for For top headlines
+else if(message.containsIgnoreCase("Top Headlines!"))
+{
+	context = {"id":"TOP HEADLINES","timeout":"300","params":{{"name":"type","question":"Great!choose the Source!!","suggestions":{"list":{{"text":"bbc-news"},{"text":"the-hindu"},{"text":"the-times-of-india"},{"text":"abc-news"},{"text":"business-insider"},{"text":"cnn"},{"text":"crypto-coins-news"}}}}}};
+	response.put("context",context);
+}
+// Asking suggestions for Instant News
+else if(message.containsIgnoreCase("Instant News!"))
+{
+	context = {"id":"INSTANT NEWS","timeout":"300","params":{{"name":"type","question":"Choose Country :wink: !!","suggestions":{"list":{{"text":"United-States"},{"text":"India"}}}}}};
+	response.put("context",context);
+}
+return response;
