@@ -1,0 +1,69 @@
+
+card = Map();
+response = Map();
+//validating response
+if(arguments == "")
+{
+	response.put("text"," Please provide a search query :grinning:");
+	return response;
+}
+key = "AIzaSyA4z6CnCxzlNN_nM1hYZr9DZMFVGeL9ClI";
+// API Call
+resp = getUrl("https://www.googleapis.com/customsearch/v1?key=" + key + "&cx=012009334575539248971:0wzp6b1hmzy&q=" + encodeurl(arguments) + "&fields=kind,items(snippet,link,displayLink,title,pagemap/cse_thumbnail/src)");
+list = List();
+//Print if the values empty
+try 
+{
+	list = resp.get("items");
+}
+
+ catch (e)
+{	response = {"text":"Custom Search!","card":{"theme":"modern-inline"},"slides":{{"type":"text","title":"Couldn't find anything related to your search ! :sad: ","data":"Please check the spelling or try with a different keyword :grinning: "}}};
+	return response;
+}
+links = List();
+snippets = List();
+titles = List();
+for each  i in list
+{
+	snippets.add(i.get("snippet"));
+	links.add(i.get("link"));
+	titles.add(i.get("title"));
+}
+var = resp.get("items").size();
+// Results are not that binary :grinning:
+if(var == 0)
+{
+	card = {"text":"Couldn't find anything related to your Search :sad:\nPlease Check Your Query or Try with a Different Word! :grinning:","bot":{"name":"ZohoSearch"}};
+}
+//Printing the result in a card
+else if(var == 1)
+{
+	card = {"text":"Top Results related to your Search :smile: ","bot":{"name":"Custom Search for Zoho!"},"card":{"title":"Hip-Hip Hurray :grinning: ","thumbnail":"http://bit.ly/2R81jNb","theme":"modern-inline"},"slides":{{"type":"text","title":titles.get(0),"buttons":{{"label":"VIew...","action":{"type":"open.url","data":{"web":links.get(0)}},"type":"+"}},"data":snippets.get(0)},{"type":"text","title":"Search More! :search:","data":"\n\n [Open](https://cse.google.com/cse?cx=012009334575539248971:0wzp6b1hmzy)"}}};
+	//return card;
+}
+else if(var == 2)
+{
+	card = {"text":"Topics related to your Search","bot":{"name":"Custom Search for Zoho!"},"card":{"title":"Hip-Hip Hurray! :grinning: ","thumbnail":"https://goo.gl/38NYsn","theme":"modern-inline"},"slides":{{"type":"text","title":titles.get(0),"buttons":{{"label":"VIew...","action":{"type":"open.url","data":{"web":links.get(0)}},"type":"+"}},"data":snippets.get(0)},{"type":"text","title":titles.get(1),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(1)}},"type":"+"}},"data":snippets.get(1)},{"type":"text","title":"Search More! :search:","data":"\n\n [Open](https://cse.google.com/cse?cx=012009334575539248971:0wzp6b1hmzy)"}}};
+	// return card;
+}
+else if(var == 3)
+{
+	card = {"text":"Topics related to your Search","bot":{"name":"Custom Search for Zoho!"},"card":{"title":"Yippee ! :grinning: ","thumbnail":"https://goo.gl/38NYsn","theme":"modern-inline"},"slides":{{"type":"text","title":titles.get(0),"buttons":{{"label":"VIew...","action":{"type":"open.url","data":{"web":links.get(0)}},"type":"+"}},"data":snippets.get(0)},{"type":"text","title":titles.get(1),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(1)}},"type":"+"}},"data":snippets.get(1)},{"type":"text","title":titles.get(2),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(2)}},"type":"+"}},"data":snippets.get(2)},{"type":"text","title":"Search More! :search:","data":"\n\n [Open](https://cse.google.com/cse?cx=012009334575539248971:0wzp6b1hmzy)"}}};
+	// return card;
+}
+else if(var == 4)
+{
+	card = {"text":"Topics related to your Search","bot":{"name":"Custom Search for Zoho!"},"card":{"title":"Hip-Hip Hurray! :grinning: ","thumbnail":"https://goo.gl/38NYsn","theme":"modern-inline"},"slides":{{"type":"text","title":titles.get(0),"buttons":{{"label":"VIew...","action":{"type":"open.url","data":{"web":links.get(0)}},"type":"+"}},"data":snippets.get(0)},{"type":"text","title":titles.get(1),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(1)}},"type":"+"}},"data":snippets.get(1)},{"type":"text","title":titles.get(2),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(2)}},"type":"+"}},"data":snippets.get(2)},{"type":"text","title":titles.get(3),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(3)}},"type":"+"}},"data":snippets.get(3)},{"type":"text","title":"Search More! :search:","data":"\n\n [Open](https://cse.google.com/cse?cx=012009334575539248971:0wzp6b1hmzy)"}}};
+	//return card;
+}
+else if(var >= 5 && var < 10)
+{
+	card = {"text":"Top Results related to your Search","bot":{"name":"Custom Search for Zoho!"},"card":{"title":"Yippee! :grinning: ","thumbnail":"https://goo.gl/38NYsn","theme":"modern-inline"},"slides":{{"type":"text","title":titles.get(0),"buttons":{{"label":"VIew...","action":{"type":"open.url","data":{"web":links.get(0)}},"type":"+"}},"data":snippets.get(0)},{"type":"text","title":titles.get(1),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(1)}},"type":"+"}},"data":snippets.get(1)},{"type":"text","title":titles.get(2),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(2)}},"type":"+"}},"data":snippets.get(2)},{"type":"text","title":titles.get(3),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(3)}},"type":"+"}},"data":snippets.get(3)},{"type":"text","title":titles.get(4),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(4)}},"type":"+"}},"data":snippets.get(4)},{"type":"text","title":"Search More! :search:","data":"\n\n [Open](https://cse.google.com/cse?cx=012009334575539248971:0wzp6b1hmzy)"}}};
+}
+else
+{
+	card = {"text":"Top Results related to your Search","bot":{"name":"Custom Search for Zoho!"},"card":{"title":"Yippee! :grinning: ","thumbnail":"https://goo.gl/38NYsn","theme":"modern-inline"},"slides":{{"type":"text","title":titles.get(0),"buttons":{{"label":"VIew...","action":{"type":"open.url","data":{"web":links.get(0)}},"type":"+"}},"data":snippets.get(0)},{"type":"text","title":titles.get(1),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(1)}},"type":"+"}},"data":snippets.get(1)},{"type":"text","title":titles.get(2),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(2)}},"type":"+"}},"data":snippets.get(2)},{"type":"text","title":titles.get(3),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(3)}},"type":"+"}},"data":snippets.get(3)},{"type":"text","title":titles.get(4),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(4)}},"type":"+"}},"data":snippets.get(4)},{"type":"text","title":titles.get(5),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(5)}},"type":"+"}},"data":snippets.get(5)},{"type":"text","title":titles.get(6),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(6)}},"type":"+"}},"data":snippets.get(6)},{"type":"text","title":titles.get(7),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(7)}},"type":"+"}},"data":snippets.get(7)},{"type":"text","title":titles.get(8),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(8)}},"type":"+"}},"data":snippets.get(8)},{"type":"text","title":titles.get(9),"buttons":{{"label":"View...","action":{"type":"open.url","data":{"web":links.get(9)}},"type":"+"}},"data":snippets.get(9)},{"type":"text","title":"Search More! :search:","data":"\n\n [Open](https://cse.google.com/cse?cx=012009334575539248971:0wzp6b1hmzy)"}}};
+}
+//info card;
+return card;

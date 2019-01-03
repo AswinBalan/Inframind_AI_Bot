@@ -1,0 +1,40 @@
+
+response = Map();
+user_id = options.get("id");
+//info user_i;
+//GRAPH API - FACEBOOK
+//call for News feed
+response0 = getUrl("https://graph.facebook.com/" + user_id + "/feed?access_token=EAAKljFwYdK4BAJnJj1bcAZAZAwZChehCbo3pOgU1soiypDZCmcy5qPAABrFOXmIh6fZCTSeAPJxyobijIUu3h2lhFsPxRztOT7foJps39W9u9AP9Pg2iC4zueIJDJBc9XVb6YaSnTrg7ZCPWn9LmU44ZB7URfXM7lU2EJoVp9MsuSOms0feXDjCtVroMdi1ckC7af8qJZCuhowZDZD");
+//Call for getting about
+response1 = getUrl("https://graph.facebook.com/" + user_id + "?fields=birthday,email,hometown&access_token=EAAKljFwYdK4BAJnJj1bcAZAZAwZChehCbo3pOgU1soiypDZCmcy5qPAABrFOXmIh6fZCTSeAPJxyobijIUu3h2lhFsPxRztOT7foJps39W9u9AP9Pg2iC4zueIJDJBc9XVb6YaSnTrg7ZCPWn9LmU44ZB7URfXM7lU2EJoVp9MsuSOms0feXDjCtVroMdi1ckC7af8qJZCuhowZDZD");
+//API call for getting profile picture
+response2 = getUrl("https://graph.facebook.com/v3.2/" + user_id + "/picture?width=1080&height=1080&redirect=false&access_token=EAAKljFwYdK4BAJnJj1bcAZAZAwZChehCbo3pOgU1soiypDZCmcy5qPAABrFOXmIh6fZCTSeAPJxyobijIUu3h2lhFsPxRztOT7foJps39W9u9AP9Pg2iC4zueIJDJBc9XVb6YaSnTrg7ZCPWn9LmU44ZB7URfXM7lU2EJoVp9MsuSOms0feXDjCtVroMdi1ckC7af8qJZCuhowZDZD");
+info response0;
+info response1;
+info response2;
+created_time = List();
+feed = response0.get("data");
+message = List();
+// storing messages in a list
+for each  i in feed
+{
+	created_time.add(i.get("created_time"));
+	if(i.containsKey("message"))
+	{
+		message.add(i.get("message"));
+	}
+	else
+	{
+		message.add("null");
+	}
+}
+//parsing the json for about details
+
+profile = response2.get("data").get("url");
+birthday = response1.get("birthday");
+email = response1.get("email");
+name = response1.get("hometown").get("name");
+//info name;
+// presenting the result in a card view
+card = {"card":{"thumbnail":"https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=2056922647734822&height=1080&width=1080&ext=1548658658&hash=AeQtM-07qAnXbfvS","theme":"modern-inline"},"slides":{{"type":"list","title":"_*ABOUT*_","data":{name,email,birthday}},{"type":"label","title":"FEEDS","data":{{"Created at :" + created_time.get(0):"message :" + message.get(0)},{"Created at :" + created_time.get(1):"message :" + message.get(1)},{"Created at :" + created_time.get(2):"message :" + message.get(2)},{"Created at :" + created_time.get(3):"message :" + message.get(3)},{"Created at :" + created_time.get(4):"message :" + message.get(4)}}}},"text":"Facebook Feeds !"};
+return card;

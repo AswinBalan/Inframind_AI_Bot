@@ -1,0 +1,32 @@
+
+response = Map();
+link = options.get("link");
+//CHECKING WHETHER THE USER ENTERED THE URL OR NOT
+if(link == "")
+{
+	response.put("text","Please provide a valid Url to Short! :smile: ");
+	return response;
+}
+//<---------------------------------->
+//call for bitly version 3 API
+response = getUrl("https://api-ssl.bitly.com/v3/shorten?access_token=f4a9ccd097706f2f55ebaccc5cdacee04a639360&longUrl=" + encodeurl(link));
+info response;
+//VALIDATING RESPONSE
+if(response.get("status_txt").equalsIgnoreCase("INVALID_URI"))
+{
+	response.put("text","The URI seems to be Invalid! :sad: ");
+	return response;
+}
+//RETURNING RESPONSE IN A CARD 
+else if(response.get("status_txt").equalsIgnoreCase("ok"))
+{
+	bitlink = response.get("data").get("url");
+	card = {"card":{"theme":"modern-inline"},"slides":{{"type":"list","title":"_*BITLINK*_- _share everywhere!_ :wink: ","data":{bitlink}}},"text":"Yippie! :grinning: "};
+	return card;
+}
+
+else
+{
+	response.put("text","Something went Wrong!");
+	return response;
+}
