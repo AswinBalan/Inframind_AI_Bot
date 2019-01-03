@@ -1,0 +1,529 @@
+
+resp = Map();
+//info context_id;
+//info answers;
+if(answers.isEmpty())
+{
+	card = Map();
+	card.put("text","Something went Wrong! Please try again!");
+	return card;
+}
+
+// API clls for different responses in NEWS
+if(context_id.equals("HOT NEWS") || context_id.equals("TOP HEADLINES") || context_id.equals("INSTANT NEWS"))
+{
+	category = answers.get("type").get("text");
+	if(category.equalsIgnoreCase("general") || category.equalsIgnoreCase("business") || category.equalsIgnoreCase("science") || category.equalsIgnoreCase("sports") || category.equalsIgnoreCase("entertainment") || category.equalsIgnoreCase("health") || category.equalsIgnoreCase("technology"))
+	{
+       // Calling the NEWS API for category News!
+		response = Map();
+		resp = invokeurl
+		[
+			url :"https://newsapi.org/v2/top-headlines?country=in&category=" + encodeurl(category)
+			type :GET
+			headers:{"Authorization":"2384030e312d4789b5e9ca72180aeb8c"}
+		];
+		//info resp;
+	}
+	else if(category.equalsIgnoreCase("the-times-of-india") || category.equalsIgnoreCase("the-hindu") || category.equalsIgnoreCase("abc-news") || category.equalsIgnoreCase("bbc-news") || category.equalsIgnoreCase("Cnn") || category.equalsIgnoreCase("business-insider") || category.equalsIgnoreCase("crypto-coins-news"))
+	{
+	// CALLING THE API FOR DIFFERENT SOURCES
+		response = Map();
+		resp = invokeurl
+		[
+			url :"https://newsapi.org/v2/top-headlines?sources=" + encodeurl(category)
+			type :GET
+			headers:{"Authorization":"2384030e312d4789b5e9ca72180aeb8c"}
+		];
+		//info resp;
+	}
+// CHECKING FOR INDIA OR UNITED STATES 
+	else if(category.equalsIgnoreCase("United-States") || category.equalsIgnoreCase("India"))
+	{
+		if(category == "United-States")
+		{
+			country = "us";
+		}
+		else
+		{
+			country = "in";
+		}
+		resp = invokeurl
+		[
+			url :"https://newsapi.org/v2/top-headlines?country=" + encodeurl(country)
+			type :GET
+			headers:{"Authorization":"2384030e312d4789b5e9ca72180aeb8c"}
+		];
+	}
+	//check if the response isEmpty (nothing)
+	if(resp.isEmpty())
+	{
+		card = Map();
+		card.put("text","Seems to be Invalid at this Stage! :sad: ");
+		return card;
+	}
+//HANDLING EMPTY RESPONSES
+	else if(resp.get("status").equalsIgnoreCase("ok"))
+	{
+		if(resp.get("articles").size() == 0)
+		{
+			card = Map();
+			card.put("text","Couldn't find anything related to your search :sad: Please try with different word!");
+			return card;
+		}
+		var = resp.get("articles").size();
+		url = List();
+		image = List();
+		title = List();
+		content = List();
+		inc = -1;
+		for each  i in resp.get("articles")
+		{
+			inc = inc + 1;
+			url.add(i.get("url"));
+			image.add(i.get("urlToImage"));
+			title.add(i.get("title"));
+			content.add(i.get("content"));
+			if(inc == 9)
+			{
+				break;
+			}
+		}
+		newcontent = List();
+		newtitle = List();
+		inc = -1;
+		// reusability
+		for each  i in title
+		{
+			//because title never be null :grinning:
+			inc = inc + 1;
+			if(content.get(inc) == null)
+			{
+				newcontent.add(i);
+			}
+			else
+			{
+				newcontent.add(content.get(inc));
+			}
+			if(i.length() > 96)
+			{
+				newtitle.add(i.substring(0,96));
+			}
+			else
+			{
+				newtitle.add(i);
+			}
+		}
+		bitlinklist = List();
+		bitlinklist1 = List();
+		indices = -1;
+//SHORTENING URL OF THE NEWS SOURCES FOR DECENT PRESENTATION - BITLY SERVICE
+		for each  i in url
+		{
+			indices = indices + 1;
+			img = image.get(indices);
+			//url shortener apicall-------------------------------------->
+			request = getUrl("https://api-ssl.bitly.com/v3/shorten?access_token=f4a9ccd097706f2f55ebaccc5cdacee04a639360&longUrl=" + encodeUrl(i));
+			if(request.get("status_txt").equalsIgnoreCase("INVALID_URI"))
+			{
+				bitlinklist.add("Can't Get the Url for the Topic :sad: You can try In Custom Search :grinning: ");
+			}
+			else if(request.get("status_txt").equalsIgnoreCase("ok"))
+			{
+				bitlink = request.get("data").get("url");
+				bitlinklist.add(bitlink);
+			}
+			if(img == null)
+			{
+				bitlinklist1.add("https://goo.gl/bv8A3x");
+			}
+			else
+			{
+				bitlinklist1.add(img);
+			}
+		}
+// PRESENTING RESPONSES BASED ON NUMBERS IN A CARD FORMAT
+		if(var == 1)
+		{
+			card = {"card":{"thumbnail":"https://goo.gl/eurUp8","theme":"prompt"},"slides":{{"type":"images","title":newtitle.get(0) + "...","data":{bitlinklist1.get(0)}},{"type":"text","title":"Source Url - " + bitlinklist.get(0),"data":newcontent.get(0)}},"text":"Top News Related to Your Search! "};
+		}
+		else if(var == 2)
+		{
+			card = {"card":{"thumbnail":"https://goo.gl/eurUp8","theme":"prompt"},"slides":{{"type":"images","title":newtitle.get(0) + "...","data":{bitlinklist1.get(0)}},{"type":"text","title":"Source Url - " + bitlinklist.get(0),"data":newcontent.get(0)},{"type":"images","title":newtitle.get(1) + "...","data":{bitlinklist1.get(1)}},{"type":"text","title":"Source Url - " + bitlinklist.get(1),"data":newcontent.get(1)}},"text":"Top News Related to Your Search! "};
+		}
+		else if(var == 3)
+		{
+			card = {"card":{"thumbnail":"https://goo.gl/eurUp8","theme":"prompt"},"slides":{{"type":"images","title":newtitle.get(0) + "...","data":{bitlinklist1.get(0)}},{"type":"text","title":"Source Url - " + bitlinklist.get(0),"data":newcontent.get(0)},{"type":"images","title":newtitle.get(1) + "...","data":{bitlinklist1.get(1)}},{"type":"text","title":"Source Url - " + bitlinklist.get(1),"data":newcontent.get(1)},{"type":"images","title":newtitle.get(2) + "...","data":{bitlinklist1.get(2)}},{"type":"text","title":"Source Url - " + bitlinklist.get(2),"data":newcontent.get(2)}},"text":"Top News Related to Your Search! "};
+		}
+		else if(var == 4)
+		{
+			card = {"card":{"thumbnail":"https://goo.gl/eurUp8","theme":"prompt"},"slides":{{"type":"images","title":newtitle.get(0) + "...","data":{bitlinklist1.get(0)}},{"type":"text","title":"Source Url - " + bitlinklist.get(0),"data":newcontent.get(0)},{"type":"images","title":newtitle.get(1) + "...","data":{bitlinklist1.get(1)}},{"type":"text","title":"Source Url - " + bitlinklist.get(1),"data":newcontent.get(1)},{"type":"images","title":newtitle.get(2) + "...","data":{bitlinklist1.get(2)}},{"type":"text","title":"Source Url - " + bitlinklist.get(2),"data":newcontent.get(2)},{"type":"images","title":newtitle.get(3) + "...","data":{bitlinklist1.get(3)}},{"type":"text","title":"Source Url - " + bitlinklist.get(3),"data":newcontent.get(3)}},"text":"Top News Related to Your Search! "};
+		}
+		else if(var >= 5 && var < 10)
+		{
+			card = {"card":{"thumbnail":"https://goo.gl/eurUp8","theme":"prompt"},"slides":{{"type":"images","title":newtitle.get(0) + "...","data":{bitlinklist1.get(0)}},{"type":"text","title":"Source Url -" + bitlinklist.get(0),"data":newcontent.get(0)},{"type":"images","title":newtitle.get(1) + "...","data":{bitlinklist1.get(1)}},{"type":"text","title":"Source Url -" + bitlinklist.get(1),"data":newcontent.get(1)},{"type":"images","title":newtitle.get(2) + "...","data":{bitlinklist1.get(2)}},{"type":"text","title":"Source Url -" + bitlinklist.get(2),"data":newcontent.get(2)},{"type":"images","title":newtitle.get(3) + "...","data":{bitlinklist1.get(3)}},{"type":"text","title":"Source Url -" + bitlinklist.get(3),"data":newcontent.get(3)},{"type":"images","title":newtitle.get(4) + "...","data":{bitlinklist1.get(4)}},{"type":"text","title":"Source Url -" + bitlinklist.get(4),"data":newcontent.get(4)}},"text":"Top News Related to Your Search! "};
+		}
+		else
+		{
+			card = {"card":{"thumbnail":"https://goo.gl/eurUp8","theme":"prompt"},"slides":{{"type":"images","title":newtitle.get(0) + "...","data":{bitlinklist1.get(0)}},{"type":"text","title":"Source Url -" + bitlinklist.get(0),"data":newcontent.get(0)},{"type":"images","title":newtitle.get(1) + "...","data":{bitlinklist1.get(1)}},{"type":"text","title":"Source Url -" + bitlinklist.get(1),"data":newcontent.get(1)},{"type":"images","title":newtitle.get(2) + "...","data":{bitlinklist1.get(2)}},{"type":"text","title":"Source Url -" + bitlinklist.get(2),"data":newcontent.get(2)},{"type":"images","title":newtitle.get(3) + "...","data":{bitlinklist1.get(3)}},{"type":"text","title":"Source Url -" + bitlinklist.get(3),"data":newcontent.get(3)},{"type":"images","title":newtitle.get(4) + "...","data":{bitlinklist1.get(4)}},{"type":"text","title":"Source Url -" + bitlinklist.get(4),"data":newcontent.get(4)},{"type":"images","title":newtitle.get(5) + "...","data":{bitlinklist1.get(5)}},{"type":"text","title":"Source Url -" + bitlinklist.get(5),"data":newcontent.get(5)},{"type":"images","title":newtitle.get(6) + "...","data":{bitlinklist1.get(6)}},{"type":"text","title":"Source Url -" + bitlinklist.get(6),"data":newcontent.get(6)},{"type":"images","title":newtitle.get(7) + "...","data":{bitlinklist1.get(7)}},{"type":"text","title":"Source Url -" + bitlinklist.get(7),"data":newcontent.get(7)},{"type":"images","title":newtitle.get(8) + "...","data":{bitlinklist1.get(8)}},{"type":"text","title":"Source Url -" + bitlinklist.get(8),"data":newcontent.get(8)},{"type":"images","title":newtitle.get(9) + "...","data":{bitlinklist1.get(9)}},{"type":"text","title":"Source Url -" + bitlinklist.get(9),"data":newcontent.get(9)}},"text":"Top News Related to Your Search! "};
+		}
+	}
+}
+
+//CODE SNIPPET FOR GOOGLE-BOOKS
+
+else if(context_id.equals("OPTIONS") || context_id.equals("BOOKS") || context_id.equals("MAGAZINES"))
+{
+	if(context_id.equals("OPTIONS"))
+	{
+		//info "options";
+		answer = answers.get("answer").get("text");
+		type = answers.get("type").get("text");
+		//checking for a valid author name
+		if(answer.matches("\pL+[\pL\pZ\pP]{0,}$"))
+		{
+			if(type.equalsIgnoreCase("Books"))
+			{
+				details = answers.get("details").get("text");
+				if(details.equalsIgnoreCase("Author"))
+				{
+					info "entered";
+					resp = invokeurl
+					[
+						url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(answer) + "+inauthor:" + encodeUrl(answer)
+						type :GET
+						connection:"gbooks15"
+					];
+				}
+				else if(details.equalsIgnoreCase("Title"))
+				{
+					info "title";
+					resp = invokeurl
+					[
+						url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(answer) + "+intitle:" + encodeUrl(answer)
+						type :GET
+						connection:"gbooks15"
+					];
+				}
+				else if(details.equalsIgnoreCase("Publisher"))
+				{
+					resp = invokeurl
+					[
+						url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(answer) + "+inpublisher:" + encodeUrl(answer)
+						type :GET
+						connection:"gbooks15"
+					];
+				}
+				else
+				{
+					response.put("text","One of the Options seems to be Invalid :sad: ");
+					return response;
+				}
+			}
+			else if(type.equalsIgnoreCase("Magazines"))
+			{
+				info "magazines";
+				//answer = answers.get("answer").get("text");
+				resp = invokeurl
+				[
+					url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(answer)
+					type :GET
+					connection:"gbooks15"
+				];
+			}
+			else
+			{
+				response.put("text","One of the Options seems to be Invalid! .You should choose only from the given options :grinning: ");
+				return response;
+			}
+		}
+		else
+		{
+			response = {"text":"INVALID NAME!!!","card":{"theme":"modern-inline"},"slides":{{"type":"text","title":"The Name  you entered seems to be Invalid ! Please check your spelling :grinning: ","data":" "}}};
+			return response;
+		}
+	}
+	//                                     ---DEEP SEARCH FOR BOOKS -CODE STARTS HERE--
+	else if(context_id.equals("BOOKS"))
+	{
+		//info "books";
+		author = answers.get("author").get("text");
+		title = answers.get("title").get("text");
+		if(author.matches("^\pL+[\pL\pZ\pP]{0,}$") && title.matches("^\pL+[\pL\pZ\pP]{0,}$"))
+		{
+			pub_isbn = answers.get("answer").get("text");
+			if(pub_isbn.equalsIgnoreCase("no") || pub_isbn.equalsIgnoreCase("noo"))
+			{
+				//title="The Irresistible Rise of Harry Potter";
+				//author ="Andrew Blake";
+				resp = invokeurl
+				[
+					url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(title) + "+inauthor:" + encodeUrl(author) + "&printType=books"
+					type :GET
+					connection:"gbooks15"
+				];
+			}
+			//The Magic of Harry Potter
+			else if(pub_isbn.matches("[0-9]+"))
+			{
+				info "isbn";
+				// pub_isbn ="1560653418";
+				//title ="Abraham Lincoln";
+				resp = invokeurl
+				[
+					url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(title) + "+isbn:" + encodeUrl(pub_isbn) + "&printType=books"
+					type :GET
+					connection:"gbooks15"
+				];
+			}
+			else if(pub_isbn.matches("^\pL+[\pL\pZ\pP]{0,}$"))
+			{
+				info "alpha";
+				resp = invokeurl
+				[
+					url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(title) + "+inpublisher:" + encodeUrl(pub_isbn) + "&printType=books"
+					type :GET
+					connection:"gbooks15"
+				];
+			}
+			else
+			{
+				response.put("text","Invalid Publisher name or ISBN");
+				return response;
+			}
+		}
+		else
+		{
+			response.put("text","Invalid Author name or Title Name!");
+			return response;
+		}
+	}
+	// ---- DEEP SEARCH OF MAGAZINES- CODE STARTS HERE -----
+	else if(context_id.equals("MAGAZINES"))
+	{
+		info "mag";
+		title = answers.get("title").get("text");
+		author = answers.get("author").get("text");
+		if(author.matches("^\pL+[\pL\pZ\pP]{0,}$") && title.matches("^\pL+[\pL\pZ\pP]{0,}$"))
+		{
+			//eg : "Peter Brooker + Andrew Thacker" or "Andrew Thacker";
+			pub_isbn = answers.get("answer").get("text");
+			if(pub_isbn.equalsIgnoreCase("no"))
+			{
+				info "wiik";
+				resp = invokeurl
+				[
+					url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(title) + "+inauthor:" + encodeUrl(author)
+					type :GET
+					connection:"gbooks15"
+				];
+			}
+			else if(pub_isbn.matches("[0-9]+"))
+			{
+				resp = invokeurl
+				[
+					url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(title) + "+isbn:" + encodeUrl(pub_isbn)
+					type :GET
+					connection:"gbooks15"
+				];
+			}
+			else if(pub_isbn.matches("^\pL+[\pL\pZ\pP]{0,}$"))
+			{
+				//info "publisher_part";
+				resp = invokeurl
+				[
+					url :"https://www.googleapis.com/books/v1/volumes?q=" + encodeUrl(title) + "+inpublisher:" + encodeUrl(pub_isbn)
+					type :GET
+					connection:"gbooks15"
+				];
+			}
+			else
+			{
+				response.put("text","Invalid Publisher name or ISBN");
+				return response;
+			}
+		}
+		else
+		{
+			response.put("text","Invalid Author name or Title name!");
+			return response;
+		}
+	}
+	// may not be executed but for safety :) 
+	else
+	{
+		response = {"text":"INVALID CHOICE!!!","card":{"theme":"modern-inline"},"slides":{{"type":"text","title":"You should choose only from the given suggestions!","data":" :sad: "}}};
+		return response;
+	}
+	// --CODE FOR RESPONSE JSON PARSING--
+	// common for all category--->
+	info resp;
+	// checking for validity! 
+	try 
+	{
+		list = resp.get("items");
+	}
+ catch (e)
+	{		response = {"text":"Google Books!","card":{"theme":"modern-inline"},"slides":{{"type":"text","title":"No Books or Magazines found ! :sad: ","data":"Couldn't get any Books or Magazines related to your search ! Please check your spelling or try with a different keyword :grinning: "}}};
+		return response;
+	}
+	// getting the size of the list
+	var = list.size();
+	// Print 'not found' if nothing in the list
+	if(var == 0)
+	{
+		response = {"text":"Google Books!","card":{"theme":"modern-inline"},"slides":{{"type":"text","title":"No Books or Magazines found ! :sad: ","data":"Couldn't get any Books or Magazines related to your search! Please check your spelling or try with a different keyword :grinning: "}}};
+		return response;
+	}
+	// Initializing required Lists for storing the values
+	titles = List();
+	authors = List();
+	publisher = List();
+	infolink = List();
+	previewlink = List();
+	currency = List();
+	download = List();
+	cost = List();
+	inc = -1;
+	d1 = Map();
+	d2 = Map();
+	// loop through the list for gettting all (upto 10 if available) the book or Magazine details
+	for each  i in list
+	{
+		inc = inc + 1;
+		titles.add(i.get("volumeInfo").get("title"));
+		infolink.add(i.get("volumeInfo").get("infoLink"));
+		previewlink.add(i.get("volumeInfo").get("previewLink"));
+		// checking for validity for Inconsistent keys in the response 
+		if(i.get("saleInfo").containKey("retailPrice"))
+		{
+			cst = i.get("saleInfo").get("retailPrice");
+			cost.add(cst.get("amount"));
+			currency.add(cst.get("currencyCode"));
+		}
+		else
+		{
+			cost.add(i.get("saleInfo").get("saleability"));
+			currency.add(" ");
+		}
+		if(i.get("volumeInfo").containKey("authors"))
+		{
+			authors.add(i.get("volumeInfo").get("authors"));
+		}
+		else
+		{
+			authors.add("-");
+		}
+		if(i.get("volumeInfo").containKey("publisher"))
+		{
+			publisher.add(i.get("volumeInfo").get("publisher"));
+		}
+		else
+		{
+			publisher.add("-");
+		}
+		// .acsm format of ebook for Download
+		d1 = i.get("accessInfo").get("epub");
+		d2 = i.get("accessInfo").get("pdf");
+		if(d1.containKey("acsTokenLink"))
+		{
+			download.add(d1.get("acsTokenLink"));
+		}
+		else if(d1.containKey("downloadLink"))
+		{
+			download.add(d1.get("downloadLink"));
+		}
+		else if(d2.containKey("acsTokenLink"))
+		{
+			download.add(d2.get("acsTokenLink"));
+		}
+		else if(d2.containKey("downloadLink"))
+		{
+			download.add(d2.get("downloadLink"));
+		}
+		else
+		{
+			// if both are not present view webreader link
+			download.add(i.get("accessInfo").get("webReaderLink"));
+		}
+		if(inc == 9)
+		{
+			break;
+		}
+	}
+	j = -1;
+	// key for v3 bitly api(basic auth)
+	key = "f4a9ccd097706f2f55ebaccc5cdacee04a639360";
+	infolinks = List();
+	previewlinks = List();
+	downloadlinks = List();
+	for each  i in infolink
+	{
+		j = j + 1;
+		request = getUrl("https://api-ssl.bitly.com/v3/shorten?access_token=" + encodeUrl(key) + "&longUrl=" + encodeUrl(i));
+		request1 = getUrl("https://api-ssl.bitly.com/v3/shorten?access_token=" + encodeUrl(key) + "&longUrl=" + encodeUrl(previewlink.get(j)));
+		request2 = getUrl("https://api-ssl.bitly.com/v3/shorten?access_token=" + encodeUrl(key) + "&longUrl=" + encodeUrl(download.get(j)));
+		// check validity for links
+		if(request.get("status_txt").equalsIgnoreCase("INVALID_URI"))
+		{
+			infolinks.add("null");
+		}
+		else if(request.get("status_txt").equalsIgnoreCase("ok"))
+		{
+			bitlink = request.get("data").get("url");
+			dlink = request2.get("data").get("url");
+			infolinks.add(bitlink);
+			downloadlinks.add(dlink);
+		}
+		else
+		{
+			infolinks.add("null");
+		}
+		if(request1.get("status_txt").equalsIgnoreCase("INVALID_URI"))
+		{
+			previewlinks.add("null");
+		}
+		else if(request1.get("status_txt").equalsIgnoreCase("ok"))
+		{
+			bitlink1 = request1.get("data").get("url");
+			previewlinks.add(bitlink1);
+		}
+		else
+		{
+			previewlinks.add("null");
+		}
+	}
+	// PRINTING RESULTS ACCORDING TO THEIR SIZES
+	if(var == 1)
+	{
+		card = {"card":{"thumbnail":"https://goo.gl/UNP7wS","theme":"modern-inline"},"slides":{{"type":"table","title":"GOOGLE BOOKS ","data":{"headers":{"TITLE","AUTHOR(S)","PUBLISHER","PREVIEW","INFO","PRICE","DOWNLOADLINK"},"rows":{{"TITLE":titles.get(0),"AUTHOR(S)":authors.get(0),"PUBLISHER":publisher.get(0),"PREVIEW":previewlinks.get(0),"INFO":infolinks.get(0),"PRICE":cost.get(0) + " " + currency.get(0),"DOWNLOADLINK":downloadlinks.get(0)}}}}},"text":"GOOGLE BOOKS related to your search !"};
+	}
+	else if(var == 2)
+	{
+		card = {"card":{"thumbnail":"https://goo.gl/UNP7wS","theme":"modern-inline"},"slides":{{"type":"table","title":"GOOGLE BOOKS ","data":{"headers":{"TITLE","AUTHOR(S)","PUBLISHER","PREVIEW","INFO","PRICE","DOWNLOADLINK"},"rows":{{"TITLE":titles.get(0),"AUTHOR(S)":authors.get(0),"PUBLISHER":publisher.get(0),"PREVIEW":previewlinks.get(0),"INFO":infolinks.get(0),"PRICE":cost.get(0) + " " + currency.get(0),"DOWNLOADLINK":downloadlinks.get(0)},{"TITLE":titles.get(1),"AUTHOR(S)":authors.get(1),"PUBLISHER":publisher.get(1),"PREVIEW":previewlinks.get(1),"INFO":infolinks.get(1),"PRICE":cost.get(1) + " " + currency.get(1),"DOWNLOADLINK":downloadlinks.get(1)}}}}},"text":"GOOGLE BOOKS related to your search !"};
+	}
+	else if(var == 3)
+	{
+		card = {"card":{"thumbnail":"https://goo.gl/UNP7wS","theme":"modern-inline"},"slides":{{"type":"table","title":"GOOGLE BOOKS ","data":{"headers":{"TITLE","AUTHOR(S)","PUBLISHER","PREVIEW","INFO","PRICE","DOWNLOADLINK"},"rows":{{"TITLE":titles.get(0),"AUTHOR(S)":authors.get(0),"PUBLISHER":publisher.get(0),"PREVIEW":previewlinks.get(0),"INFO":infolinks.get(0),"PRICE":cost.get(0) + " " + currency.get(0),"DOWNLOADLINK":downloadlinks.get(0)},{"TITLE":titles.get(1),"AUTHOR(S)":authors.get(1),"PUBLISHER":publisher.get(1),"PREVIEW":previewlinks.get(1),"INFO":infolinks.get(1),"PRICE":cost.get(1) + " " + currency.get(1),"DOWNLOADLINK":downloadlinks.get(1)},{"TITLE":titles.get(2),"AUTHOR(S)":authors.get(2),"PUBLISHER":publisher.get(2),"PREVIEW":previewlinks.get(2),"INFO":infolinks.get(2),"PRICE":cost.get(2) + " " + currency.get(2),"DOWNLOADLINK":downloadlinks.get(2)}}}}},"text":"GOOGLE BOOKS related to your search !"};
+	}
+	else if(var == 4)
+	{
+		card = {"card":{"thumbnail":"https://goo.gl/UNP7wS","theme":"modern-inline"},"slides":{{"type":"table","title":"GOOGLE BOOKS ","data":{"headers":{"TITLE","AUTHOR(S)","PUBLISHER","PREVIEW","INFO","PRICE","DOWNLOADLINK"},"rows":{{"TITLE":titles.get(0),"AUTHOR(S)":authors.get(0),"PUBLISHER":publisher.get(0),"PREVIEW":previewlinks.get(0),"INFO":infolinks.get(0),"PRICE":cost.get(0) + " " + currency.get(0),"DOWNLOADLINK":downloadlinks.get(0)},{"TITLE":titles.get(1),"AUTHOR(S)":authors.get(1),"PUBLISHER":publisher.get(1),"PREVIEW":previewlinks.get(1),"INFO":infolinks.get(1),"PRICE":cost.get(1) + " " + currency.get(1),"DOWNLOADLINK":downloadlinks.get(1)},{"TITLE":titles.get(2),"AUTHORS)":authors.get(2),"PUBLISHER":publisher.get(2),"PREVIEW":previewlinks.get(2),"INFO":infolinks.get(2),"PRICE":cost.get(2) + " " + currency.get(2),"DOWNLOADLINK":downloadlinks.get(2)},{"TITLE":titles.get(3),"AUTHOR(S)":authors.get(3),"PUBLISHER":publisher.get(3),"PREVIEW":previewlinks.get(3),"INFO":infolinks.get(3),"PRICE":cost.get(3) + " " + currency.get(3),"DOWNLOADLINK":downloadlinks.get(3)}}}}},"text":"GOOGLE BOOKS related to your search !"};
+	}
+	else if(var >= 5 && var < 10)
+	{
+		card = {"card":{"thumbnail":"https://goo.gl/D6h2Zq","theme":"modern-inline"},"slides":{{"type":"table","title":"GOOGLE BOOKS ","data":{"headers":{"TITLE","AUTHOR(S)","PUBLISHER","PREVIEW","INFO","PRICE","DOWNLOADLINK"},"rows":{{"TITLE":titles.get(0),"AUTHOR(S)":authors.get(0),"PUBLISHER":publisher.get(0),"PREVIEW":previewlinks.get(0),"INFO":infolinks.get(0),"PRICE":cost.get(0) + " " + currency.get(0),"DOWNLOADLINK":downloadlinks.get(0)},{"TITLE":titles.get(1),"AUTHOR(S)":authors.get(1),"PUBLISHER":publisher.get(1),"PREVIEW":previewlinks.get(1),"INFO":infolinks.get(1),"PRICE":cost.get(1) + " " + currency.get(1),"DOWNLOADLINK":downloadlinks.get(1)},{"TITLE":titles.get(2),"AUTHOR(S)":authors.get(2),"PUBLISHER":publisher.get(2),"PREVIEW":previewlinks.get(2),"INFO":infolinks.get(2),"PRICE":cost.get(2) + " " + currency.get(2),"DOWNLOADLINK":downloadlinks.get(2)},{"TITLE":titles.get(3),"AUTHOR(S)":authors.get(3),"PUBLISHER":publisher.get(3),"PREVIEW":previewlinks.get(3),"INFO":infolinks.get(3),"PRICE":cost.get(3) + " " + currency.get(3),"DOWNLOADLINK":downloadlinks.get(3)},{"TITLE":titles.get(4),"AUTHOR(S)":authors.get(4),"PUBLISHER":publisher.get(4),"PREVIEW":previewlinks.get(4),"INFO":infolinks.get(4),"PRICE":cost.get(4) + " " + currency.get(4),"DOWNLOADLINK":downloadlinks.get(4)}}}}},"text":"GOOGLE BOOKS related to your search !"};
+	}
+	else if(var >= 10)
+	{
+		card = {"card":{"thumbnail":"https://image.flaticon.com/icons/svg/201/201571.svg","theme":"modern-inline"},"slides":{{"type":"table","title":"GOOGLE BOOKS ","data":{"headers":{"TITLE","AUTHOR(S)","PUBLISHER","PREVIEW","INFO","PRICE","DOWNLOADLINK"},"rows":{{"TITLE":titles.get(0),"AUTHOR(S)":authors.get(0),"PUBLISHER":publisher.get(0),"PREVIEW":previewlinks.get(0),"INFO":infolinks.get(0),"PRICE":cost.get(0) + " " + currency.get(0),"DOWNLOADLINK":downloadlinks.get(0)},{"TITLE":titles.get(1),"AUTHOR(S)":authors.get(1),"PUBLISHER":publisher.get(1),"PREVIEW":previewlinks.get(1),"INFO":infolinks.get(1),"PRICE":cost.get(1) + " " + currency.get(1),"DOWNLOADLINK":downloadlinks.get(1)},{"TITLE":titles.get(2),"AUTHOR(S)":authors.get(2),"PUBLISHER":publisher.get(2),"PREVIEW":previewlinks.get(2),"INFO":infolinks.get(2),"PRICE":cost.get(2) + " " + currency.get(2),"DOWNLOADLINK":downloadlinks.get(2)},{"TITLE":titles.get(3),"AUTHOR(S)":authors.get(3),"PUBLISHER":publisher.get(3),"PREVIEW":previewlinks.get(3),"INFO":infolinks.get(3),"PRICE":cost.get(3) + " " + currency.get(3),"DOWNLOADLINK":downloadlinks.get(3)},{"TITLE":titles.get(4),"AUTHOR(S)":authors.get(4),"PUBLISHER":publisher.get(4),"PREVIEW":previewlinks.get(4),"INFO":infolinks.get(4),"PRICE":cost.get(4) + " " + currency.get(4),"DOWNLOADLINK":downloadlinks.get(4)},{"TITLE":titles.get(5),"AUTHOR(S)":authors.get(5),"PUBLISHER":publisher.get(5),"PREVIEW":previewlinks.get(5),"INFO":infolinks.get(5),"PRICE":cost.get(5) + " " + currency.get(5),"DOWNLOADLINK":downloadlinks.get(5)},{"TITLE":titles.get(6),"AUTHOR(S)":authors.get(6),"PUBLISHER":publisher.get(6),"PREVIEW":previewlinks.get(6),"INFO":infolinks.get(6),"PRICE":cost.get(6) + " " + currency.get(6),"DOWNLOADLINK":downloadlinks.get(6)},{"TITLE":titles.get(7),"AUTHOR(S)":authors.get(7),"PUBLISHER":publisher.get(7),"PREVIEW":previewlinks.get(7),"INFO":infolinks.get(7),"PRICE":cost.get(7) + " " + currency.get(7),"DOWNLOADLINK":downloadlinks.get(7)},{"TITLE":titles.get(8),"AUTHOR(S)":authors.get(8),"PUBLISHER":publisher.get(8),"PREVIEW":previewlinks.get(8),"INFO":infolinks.get(8),"PRICE":cost.get(8) + " " + currency.get(8),"DOWNLOADLINK":downloadlinks.get(8)},{"TITLE":titles.get(9),"AUTHOR(S)":authors.get(9),"PUBLISHER":publisher.get(9),"PREVIEW":previewlinks.get(9),"INFO":infolinks.get(9),"PRICE":cost.get(9) + " " + currency.get(9),"DOWNLOADLINK":downloadlinks.get(9)}}}}},"text":"GOOGLE BOOKS related to your search !"};
+	}
+}
+// HANDLING EDGE CAES
+else
+{
+	card = Map();
+	card.put("text","Something went wrong! Please try again later");
+}
+info card;
+return card;
